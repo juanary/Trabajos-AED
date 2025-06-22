@@ -48,7 +48,7 @@ def calcular_monto_final(monto_base, algoritmo):
 
 # func main
 def procesar_ordenes():
-    with open("ordenes.txt", "r", encoding="utf-8") as archivo:
+    with open("ordenes25.txt", "r", encoding="utf-8") as archivo:
         lineas = archivo.readlines()
 
     datos = lineas[1:]  
