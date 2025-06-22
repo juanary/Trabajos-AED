@@ -1,16 +1,5 @@
-MONEDAS_VALIDAS = ["ARS", "USD", "EUR", "GBP", "JPN"]
-
-def detectar_moneda(cadena):
-    encontrada = [m for m in MONEDAS_VALIDAS if cadena.count(m) >= 1]
-    if len(encontrada) == 1:
-        return encontrada[0]
-    elif len(encontrada) == 0:
-        return "INVALIDA"
-    else:
-        return "MULTIPLE"
-
 def validar_identificador(identificador):
-    if identificador.strip() == "" or set(identificador.strip()) <= set("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-") and not set(identificador.strip()).issubset({'-'}):
+    if identificador.strip() == "" or set(identificador.strip()) <= set("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-") and not set(identificador.strip()).issubset({'-'}): # validar que no sea solo guiones
         return True
     return False
 
@@ -57,9 +46,9 @@ def calcular_monto_final(monto_base, algoritmo):
         return monto_base - (monto_base * 0.03)
     return monto_base
 
-# func principal
+# func main
 def procesar_ordenes():
-    with open("ordenes25.txt", "r", encoding="utf-8") as archivo:
+    with open("ordenes.txt", "r", encoding="utf-8") as archivo:
         lineas = archivo.readlines()
 
     datos = lineas[1:]  
@@ -94,12 +83,39 @@ def procesar_ordenes():
         alg_com = int(linea[50:52].strip())
         alg_imp = int(linea[52:54].strip())
 
-        moneda = detectar_moneda(codigo)
+        moneda = "INVALIDA"
+        if "ARS" in codigo:
+            moneda = "ARS"
+            cant_ARS += 1
+        if "USD" in codigo:
+            if moneda != "INVALIDA":
+                moneda = "MULTIPLE"
+            else:
+                moneda = "USD"
+                cant_USD += 1
+        if "EUR" in codigo:
+            if moneda != "INVALIDA":
+                moneda = "MULTIPLE"
+            else:
+                moneda = "EUR"
+                cant_EUR += 1
+        if "GBP" in codigo:
+            if moneda != "INVALIDA":
+                moneda = "MULTIPLE"
+            else:
+                moneda = "GBP"
+                cant_GBP += 1
+        if "JPN" in codigo:
+            if moneda != "INVALIDA":
+                moneda = "MULTIPLE"
+            else:
+                moneda = "JPN"
+                cant_JPY += 1
 
         if nombre == nom_primer_benef:
             cant_nom_primer_benef += 1
 
-        if moneda not in MONEDAS_VALIDAS:
+        if moneda == "INVALIDA" or moneda == "MULTIPLE":
             cant_minvalida += 1
             total_invalidas += 1
             continue
@@ -107,17 +123,6 @@ def procesar_ordenes():
         if not validar_identificador(identificador):
             cant_binvalido += 1
             total_invalidas += 1
-
-        if moneda == "ARS":
-            cant_ARS += 1
-        elif moneda == "USD":
-            cant_USD += 1
-        elif moneda == "EUR":
-            cant_EUR += 1
-        elif moneda == "GBP":
-            cant_GBP += 1
-        elif moneda == "JPN":
-            cant_JPY += 1
 
         if validar_identificador(identificador):
             monto_base = calcular_monto_base(moneda, monto_nominal, alg_com)
@@ -160,5 +165,5 @@ def procesar_ordenes():
     print('(r15) - Porcentaje de operaciones inválidas sobre el total:', porcentaje)
     print('(r16) - Monto final promedio de las ordenes validas en moneda ARS:', promedio)
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     procesar_ordenes()
