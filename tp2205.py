@@ -1,7 +1,16 @@
 def validar_identificador(identificador):
-    if identificador.strip() == "" or set(identificador.strip()) <= set("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-") and not set(identificador.strip()).issubset({'-'}): # validar que no sea solo guiones
-        return True
-    return False
+    identificador = identificador.strip()
+    if identificador == "":
+        return False
+
+    solo_guiones = True
+    for c in identificador:
+        if not (('A' <= c <= 'Z') or ('0' <= c <= '9') or c == '-'):
+            return False
+        if c != '-':
+            solo_guiones = False
+
+    return not solo_guiones
 
 def calcular_monto_base(moneda, monto_nominal, algoritmo):
     if algoritmo == 1 and moneda == "ARS":
@@ -15,7 +24,7 @@ def calcular_monto_base(moneda, monto_nominal, algoritmo):
         else:
             comision = monto_nominal * 0.078
         return monto_nominal - comision
-    elif algoritmo == 3 and moneda in ["EUR", "GBP"]:
+    elif algoritmo == 3 and (moneda == "EUR" or moneda == "GBP"):
         comision = 100
         if monto_nominal > 25000:
             comision += monto_nominal * 0.06
@@ -27,7 +36,9 @@ def calcular_monto_base(moneda, monto_nominal, algoritmo):
         if monto_nominal < 500000:
             comision = 0
         else:
-            comision = min(monto_nominal * 0.07, 50000)
+            comision = monto_nominal * 0.07
+            if comision > 50000:
+                comision = 50000
         return monto_nominal - comision
     return monto_nominal
 
@@ -46,12 +57,11 @@ def calcular_monto_final(monto_base, algoritmo):
         return monto_base - (monto_base * 0.03)
     return monto_base
 
-# func main
-def procesar_ordenes():
+def principal():
     with open("ordenes25.txt", "r", encoding="utf-8") as archivo:
         lineas = archivo.readlines()
 
-    datos = lineas[1:]  
+    datos = lineas[1:]
 
     cant_minvalida = 0
     cant_binvalido = 0
@@ -133,7 +143,6 @@ def procesar_ordenes():
             if moneda == "ARS":
                 suma_mf_ARS += round(monto_final, 2)
                 cant_validas_ARS += 1
-
         else:
             monto_base = calcular_monto_base(moneda, monto_nominal, alg_com)
             monto_final = calcular_monto_final(monto_base, alg_imp)
@@ -166,4 +175,4 @@ def procesar_ordenes():
     print('(r16) - Monto final promedio de las ordenes validas en moneda ARS:', promedio)
 
 if __name__ == "__main__":
-    procesar_ordenes()
+    principal()
